@@ -1,0 +1,91 @@
+Time Travel Shell
+===============================================================================
+UCLA CS 111 Lab 1 Part C Design
+Professor Peter Reiher
+Fall 2015
+
+Gabriel Pawlowsky 
+204486619
+-------------------------------------------------------------------------------
+
+This is the first submission of my CS 111 Lab 1 Part CDesign. I did this work 
+on myown.
+
+As told to me by the TA, I will explain all the tricks to my design 
+implementation during office hours in person. I chose to limit the maximum
+amount of subprocesses by a parameter (-N <no_of_subprocesses>) and
+only open max that many subprocesses. If the number is smaller than 2,
+time travel mode is not supported, if pipes cannot be run in parallel
+because there are too many processses, they are executed in sequence.
+
+From Part C:
+All the requested functionality was implemented correctly to the best of my 
+understanding of the specification. One thing I was unclear about, was whether
+sequence commands should be parallelized. I decided not to, since the spec
+says that we are supposed to only parallelize at the top level, which I
+understood to mean as the level of the nodes in the command stream. While
+examples give information about how to parallelize sequence commands, I
+interpreted this to actually mean two consecutive commands at the top level.
+So test files with commands directly following one another without a 
+semicolon and newline or multiple newlines to separate them from each other
+(so that they would be put in a single sequence command at the top level) are
+not parallelized in this implementation. If such commands should have been
+parallelized and the test files to test this submission are based heavily on
+such commands, I would highly appreciate a consideration of this "potential
+limitation" of my implementation. It would be very easy for me to change this
+and also parallelize such commands but I interpreted the specification of this
+project in a way that lead me not to parallelize them. I hope I am correct.
+
+Other than that, there are no known limitations to my program other than
+those mentioned in the specification. I created a dependency graph in form
+of a linked list and blocked both reads and writes that precede or follow a
+write to the same file. Multiple reads to the same dependency are not blocked.
+Command execution and dependency checking starts in order, but then commands
+without interdependencies are executed in parallel and interleft arbitrarily.
+I have achieved a great preformance boost in my tests.
+While piazza suggested differently, I followed the specification in considering
+the simple command itself and all the following words including the input
+as read dependencies and only words folloing ">" are considered write 
+dependencies. Also according to piazza i have not included test cases, due to
+the hardship of properly testing the correct but arbitrary order of execution.
+
+As mentioned before, my implementation is based on a linked list approach for
+the dependency graph and the waiting processes communicate with each other via
+a memory map so that the parent process does not have to be in charge of their
+synchonization and therefore with a bit of tweaking the main.c file, the old
+function handing each command individually would work too. For readability and
+simplicity, I have created new functions for execution in time_travel mode in 
+my current implementation.
+
+From Part B:
+All the requested functionality was implemented as can be verified via the
+attached test cases. I compiled them on my own and put them in the files
+test-bad-part-b.sh and test-ok-part-b.sh.
+
+There are no known limitations to my program. My part A had some problems with
+reading complex subshell command structures as well as some other special
+cases. I tested the software very thoroughly and it passes all of my tests now.
+There are no special features that go beyond the specification, but my program
+can handle many many more than just the regular test cases provided.
+
+For the implementation I chose to work recursively with a function to execute
+a general command. This calls the appropriate function for executing the
+command at hand. A simple command is simply executed. Composite commands
+are executed by using the appropriate form of multi-processes (e.g. a pipe
+opens a pipe with two processes for the two commands while a sequence command
+is executed in sequence) and having every execution unit/process execute
+the general command execution function again but this time with the child
+commands. All the exit statuses are returned all the way up to the parent
+command.
+
+From Part A:
+All the requested functionality was implemented as can be verified via the
+supplied test cases.
+
+The only known limitation to my program is that not all the used storage is 
+freed completely yet. I deliberately waited with doing so to see how and when
+it will fit best in one of the later versions B or C of this lab.
+There are no special features that go beyond the specification, but my program
+can handle many many more than just the regular test cases provided.
+For the implementation I chose a stack of commands to get them into the right
+form and then a linked list to supply them to the other parts of the software.
